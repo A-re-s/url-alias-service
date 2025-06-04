@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Type
 
-from db.database import asycn_session_maker
 from repositories.users import UsersRepository
 
 
@@ -24,9 +23,9 @@ class IUnitOfWork(ABC):
     async def rollback(self): ...
 
 
-class UnitOfWork:
-    def __init__(self):
-        self.session_factory = asycn_session_maker
+class UnitOfWork(IUnitOfWork):
+    def __init__(self, session_factory):
+        self.session_factory = session_factory
 
     async def __aenter__(self):
         self.session = self.session_factory()
