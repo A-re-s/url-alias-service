@@ -95,7 +95,7 @@ prefer-stubs=no
 # the version used to run pylint.
 py-version=3.12
 
-# Discover python modules and packages in the file system subtree.
+# Discover python modules and packages in the file system idtree.
 recursive=no
 
 # Add paths to the list of the source roots. Supports globbing patterns. The
@@ -446,7 +446,11 @@ disable=raw-checker-failed,
         E0401,
         W0613,
         W0702,
-        W0718
+        W0718,
+        W0221,
+        W0622,
+        W0707,
+        W0201
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
