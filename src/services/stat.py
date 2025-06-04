@@ -26,18 +26,16 @@ class StatService:
             )
             day_ago = int((datetime.now(timezone.utc) - timedelta(days=1)).timestamp())
 
-            urls_query = select(ShortURL).where(ShortURL.user_id == user.id)
+            conditions = [ShortURL.user_id == user.id]
 
             if filters.short_code:
-                urls_query = urls_query.where(ShortURL.short_code == filters.short_code)
+                conditions.append(ShortURL.short_code == filters.short_code)
             if filters.original_url:
-                urls_query = urls_query.where(
-                    ShortURL.original_url == str(filters.original_url)
-                )
+                conditions.append(ShortURL.original_url == str(filters.original_url))
             if filters.is_active is not None:
-                urls_query = urls_query.where(ShortURL.is_active == filters.is_active)
+                conditions.append(ShortURL.is_active == filters.is_active)
             if filters.tag:
-                urls_query = urls_query.where(ShortURL.tag == filters.tag)
+                conditions.append(ShortURL.tag == filters.tag)
 
             hour_clicks = (
                 select(func.count())
@@ -68,6 +66,7 @@ class StatService:
                     day_clicks,
                 )
                 .select_from(ShortURL)
+                .where(*conditions)
                 .order_by(day_clicks.desc())
             )
 
