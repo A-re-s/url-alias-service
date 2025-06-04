@@ -1,9 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Path
 
-from api.v1.dependencies import UOWDep
+from api.v1.dependencies import FormDataDep, UOWDep, UserFromAccessTokenDep
 from schemas.users import (
     RefreshTokenSchema,
     TokenObtainPairSchema,
@@ -21,12 +20,10 @@ token_router = APIRouter(
     tags=["Token"],
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/token")
-
 
 @users_router.post("/register")
 async def register_user_jwt(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    form_data: FormDataDep,
     uow: UOWDep,
 ) -> UserInfoResponseSchema:
     user = await UsersService().add_user(uow, form_data)
@@ -35,7 +32,7 @@ async def register_user_jwt(
 
 @token_router.post("/token")
 async def get_user_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    form_data: FormDataDep,
     uow: UOWDep,
 ) -> TokenObtainPairSchema:
     token_pair = await AuthService().obtain_tokens_by_credentials(uow, form_data)
@@ -43,11 +40,7 @@ async def get_user_token(
 
 
 @users_router.get("/users/me")
-async def get_user_info(
-    access_token: Annotated[str, Depends(oauth2_scheme)],
-    uow: UOWDep,
-) -> UserInfoResponseSchema:
-    user = await AuthService().get_user_by_access_token(uow, access_token)
+async def get_user_info(user: UserFromAccessTokenDep) -> UserInfoResponseSchema:
     return user
 
 
@@ -64,10 +57,9 @@ async def refresh_tokens(
 
 @users_router.post("/users/{user_id}/revoke_tokens")
 async def revoke_user_tokens(
-    access_token: Annotated[str, Depends(oauth2_scheme)],
+    user: UserFromAccessTokenDep,
     uow: UOWDep,
     user_id: Annotated[int, Path(title="id of current user")],
 ):
-    user = await AuthService().get_user_by_access_token(uow, access_token)
     await UsersService().revoke_tokens(uow, user, user_id)
     return {"detail": "Tokens revoked"}
