@@ -3,7 +3,9 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 
 from api.v1.routers import router_v1
 from api.v1.short_urls import redirect_router
@@ -39,6 +41,14 @@ app.include_router(redirect_router)
 @app.get("/ping", tags=["Ping"])
 def health_check():
     return {"message": "pong"}
+
+
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error. Please try again later."},
+    )
 
 
 if __name__ == "__main__":
