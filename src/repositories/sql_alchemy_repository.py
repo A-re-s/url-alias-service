@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,10 +21,18 @@ class SQLAlchemyRepository(AbstractRepository):
         stmt = update(self.model).values(**data).filter_by(id=id)
         await self.session.execute(stmt)
 
-    async def find_all(self):
-        stmt = select(self.model)
-        res = await self.session.execute(stmt)
-        return res
+    async def find_all(
+        self, offset: int = 0, limit: int | None = None, **filter_by
+    ) -> List:
+        stmt = select(self.model).filter_by(**filter_by)
+
+        if offset:
+            stmt = stmt.offset(offset)
+        if limit:
+            stmt = stmt.limit(limit)
+
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
 
     async def find_one(self, **filter_by):
         stmt = select(self.model).filter_by(**filter_by)

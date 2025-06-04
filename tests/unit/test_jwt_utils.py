@@ -54,13 +54,11 @@ def test_create_token_pair(jwt_utils):
     assert "access_token" in token_pair.model_dump()
     assert "refresh_token" in token_pair.model_dump()
 
-    # Verify access token
     access_payload = jwt_utils.decode_jwt(token_pair.access_token)
     assert access_payload.id == user_id
     assert access_payload.token_type == TokenType.ACCESS
     assert access_payload.token_version == token_version
 
-    # Verify refresh token
     refresh_payload = jwt_utils.decode_jwt(token_pair.refresh_token)
     assert refresh_payload.id == user_id
     assert refresh_payload.token_type == TokenType.REFRESH
@@ -100,10 +98,8 @@ def test_validate_token_type(jwt_utils):
         exp=int(exp_time.timestamp()),
     )
 
-    # Correct token type
     jwt_utils.validate_token_type(payload, TokenType.ACCESS)
 
-    # Wrong token type
     with pytest.raises(HTTPException) as exc_info:
         jwt_utils.validate_token_type(payload, TokenType.REFRESH)
     assert exc_info.value.status_code == 401
@@ -119,10 +115,8 @@ def test_validate_token_version(jwt_utils):
         exp=int(exp_time.timestamp()),
     )
 
-    # Correct version
     jwt_utils.validate_token_version(payload, 1)
 
-    # Wrong version
     with pytest.raises(HTTPException) as exc_info:
         jwt_utils.validate_token_version(payload, 2)
     assert exc_info.value.status_code == 401
@@ -134,7 +128,6 @@ def test_token_expiration_times(jwt_utils):
     token_version = 1
     token_pair = jwt_utils.create_token_pair(user_id, token_version)
 
-    # Decode tokens to get expiration times
     access_payload = jwt_utils.decode_jwt(token_pair.access_token)
     refresh_payload = jwt_utils.decode_jwt(token_pair.refresh_token)
 
@@ -142,8 +135,6 @@ def test_token_expiration_times(jwt_utils):
     access_exp = datetime.fromtimestamp(access_payload.exp, timezone.utc)
     refresh_exp = datetime.fromtimestamp(refresh_payload.exp, timezone.utc)
 
-    # Check access token expiration (15 minutes)
     assert abs((access_exp - now).total_seconds() - 15 * 60) < 5
 
-    # Check refresh token expiration (60 minutes)
     assert abs((refresh_exp - now).total_seconds() - 60 * 60) < 5

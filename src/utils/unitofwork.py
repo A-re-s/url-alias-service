@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Type
 
+from repositories.urls import UrlsRepository
 from repositories.users import UsersRepository
 
 
 class IUnitOfWork(ABC):
-    users: Type[UsersRepository]
-
     @abstractmethod
     def __init__(self): ...
 
@@ -31,6 +29,7 @@ class UnitOfWork(IUnitOfWork):
         self.session = self.session_factory()
 
         self.users = UsersRepository(self.session)
+        self.urls = UrlsRepository(self.session)
 
     async def __aexit__(self, *args):
         await self.rollback()
