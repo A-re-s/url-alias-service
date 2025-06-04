@@ -95,6 +95,9 @@ class UrlService:
                     )
                 await uow.urls.edit_one(url.id, {"clicks_left": url.clicks_left - 1})
 
+            click_time = int(datetime.now(timezone.utc).timestamp())
+            await uow.stat.add_one({"short_url_id": url.id, "clicked_at": click_time})
+
             await uow.commit()
             return str(url.original_url)
 

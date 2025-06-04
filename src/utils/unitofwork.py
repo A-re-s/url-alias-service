@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from repositories.stat import StatRepository
 from repositories.urls import UrlsRepository
 from repositories.users import UsersRepository
 
@@ -30,6 +31,7 @@ class UnitOfWork(IUnitOfWork):
 
         self.users = UsersRepository(self.session)
         self.urls = UrlsRepository(self.session)
+        self.stat = StatRepository(self.session)
 
     async def __aexit__(self, *args):
         await self.rollback()
