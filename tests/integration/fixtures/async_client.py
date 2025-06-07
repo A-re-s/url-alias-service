@@ -3,7 +3,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from api.v1.dependencies import get_uow
-from db.database import Base
+from models.base import Base
 from src.main import app
 from utils.unitofwork import UnitOfWork
 

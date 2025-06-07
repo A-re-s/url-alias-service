@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from db.database import async_session_maker
+from db.database import db_manager
 from schemas.users import UserInfoResponseSchema
 from services.auth import AuthService
 from utils.unitofwork import IUnitOfWork, UnitOfWork
@@ -13,7 +13,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/token")
 
 
 def get_uow():
-    return UnitOfWork(async_session_maker)
+    return UnitOfWork(db_manager.async_session_maker)
 
 
 UOWDep = Annotated[IUnitOfWork, Depends(get_uow)]

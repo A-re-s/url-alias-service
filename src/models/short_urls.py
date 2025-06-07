@@ -3,10 +3,10 @@ from typing import Optional
 from sqlalchemy import Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from db.database import Base
+from models.base import Base
 
 
-class ShortURL(Base):
+class ShortURLModel(Base):
     __tablename__ = "short_urls"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)

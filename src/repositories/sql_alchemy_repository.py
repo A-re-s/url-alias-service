@@ -17,15 +17,16 @@ class SQLAlchemyRepository(AbstractRepository):
         res = await self.session.execute(stmt)
         return res.scalar_one()
 
-    async def edit_one(self, id: int, data: dict) -> int:
-        stmt = update(self.model).values(**data).filter_by(id=id)
+    async def edit_one(self, elem_id: int, data: dict) -> int:
+        stmt = update(self.model).values(**data).filter_by(id=elem_id)
         await self.session.execute(stmt)
 
     async def find_all(
-        self, offset: int = 0, limit: int | None = None, **filter_by
+        self, offset: int = 0, limit: int | None = None, filter_expr=None
     ) -> List:
-        stmt = select(self.model).filter_by(**filter_by)
-
+        stmt = select(self.model)
+        if filter_expr is not None:
+            stmt = stmt.filter(filter_expr)
         if offset:
             stmt = stmt.offset(offset)
         if limit:

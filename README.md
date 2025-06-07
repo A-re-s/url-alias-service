@@ -30,89 +30,90 @@ A FastAPI-based service for creating and managing URL aliases (URL shortener ser
 - Python 3.12+
 - Docker (optional, for containerized deployment)
 - Make (optional, for using Makefile commands)
+- Configure environment variables in `.env`:
+  ```env
+  DB_NAME=postgres
+  DB_USER=postgres
+  DB_PASSWORD=postgres
+  DB_HOST=db_host
+  DB_PORT=5432
 
-## 🔧 Installation
+  SECRET_KEY=your_secret_key
+  
+  API_PORT=8000
+  ```
+## 🚀 Installation Methods
 
-### Local Development
+### 1. Local Development (requires venv and PostgreSQL)
 
-1. Clone the repository:
-```bash
-git clone https://github.com/A-re-s/url-alias-service.git
-cd url_alias_service
-```
+This method requires a local PostgreSQL installation and Python virtual environment.
 
+1. Install PostgreSQL and create a database
 2. Create and activate a virtual environment:
 ```bash
 python -m venv .venv
-source venv/bin/activate  # for Linux/Mac
-venv\Scripts\activate  # for Windows
+source .venv/bin/activate  # Linux/Mac
+.venv\Scripts\activate    # Windows
 ```
-
 3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-
-4. Set up environment variables:
-Create a `.env` file with the following variables:
-```env
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
-DB_PORT=
-
-SECRET_KEY=
-
-API_PORT=
-```
-
-5. Run the application:
+4. Run the application:
 ```bash
 make run
 ```
 
-### Docker Deployment
+### 2. Container Deployment (requires PostgreSQL)
 
-1. Set up environment variables:
-Create a `.env` file with the following variables:
-```env
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
-DB_PORT=
+This method runs the application in a Docker container but requires an external PostgreSQL instance.
 
-SECRET_KEY=
-
-API_PORT=
-```
-2. Build and run Docker container:
+1. Install PostgreSQL and create a database
+2. Build and run the container:
 ```bash
-make docker-run
+make docker-run 
+make docker-run-detached #detached mode
 ```
+
+### 3. Docker Compose (fully containerized)
+
+This is the recommended method as it sets up both the application and PostgreSQL in containers.
+
+1. Run with Docker Compose:
+```bash
+make docker-compose-run
+```
+
+The service will be available at `http://localhost:{API_PORT}`.
 
 ## 🔍 Project Structure
 
 ```
 url_alias_service/
 ├── src/                    # Source code
-│   ├── api/               # API endpoints
-│   ├── db/                # Database models and connection
-│   ├── models/            # Data models
+│   ├── api/               # API endpoints and routers
+│   ├── core/              # Core application components
+│   ├── db/                # Database configuration
+│   ├── models/            # SQLAlchemy models
 │   ├── repositories/      # Data access layer
 │   ├── schemas/           # Pydantic schemas
-│   ├── services/         # Business logic
-│   ├── utils/            # Utility functions
-│   ├── config.py         # Configuration settings
+│   ├── services/          # Business logic layer
+│   ├── utils/             # Utility functions and helpers
+│   ├── config.py          # Configuration settings
 │   └── main.py           # Application entry point
 ├── tests/                 # Test files
-├── Dockerfile            # Docker configuration
-├── requirements.txt      # Python dependencies
-├── pyproject.toml        # Project configuration
-├── .pylintrc            # Pylint configuration
-├── .pre-commit-config.yaml # Pre-commit hooks configuration
-└── makefile             # Make commands for common tasks
+│   ├── integration/      # Integration tests
+│   ├── unit/            # Unit tests
+│   └── fixtures/        # Test fixtures and utilities
+├── .github/              # GitHub Actions workflows
+├── docker/               # Docker-related files
+├── Dockerfile           # Main Dockerfile
+├── docker-compose.yml   # Docker Compose configuration
+├── requirements.txt     # Python dependencies
+├── pyproject.toml       # Project configuration
+├── .pylintrc           # Pylint configuration
+├── .pre-commit-config.yaml # Pre-commit hooks
+└── makefile            # Make commands for common tasks
 ```
 
 ## 🚦 API Endpoints
@@ -188,10 +189,26 @@ Authorization: Bearer your_access_token
 
 ## 🧪 Testing
 
-Run tests using pytest:
+The project includes both unit and integration tests. You can run tests in several ways:
+
+### Local Testing
+Run tests using pytest locally:
 ```bash
 make test
 ```
+
+### Docker Testing
+Run tests in a Docker container:
+```bash
+make docker-test
+```
+
+The project uses pytest with async support and includes:
+- Unit tests for individual components
+- Integration tests for API endpoints
+- Fixtures for database and authentication
+- Mocking of external services
+- Async test client for FastAPI
 
 ## 📝 Code Quality
 

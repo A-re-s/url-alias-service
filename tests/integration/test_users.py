@@ -8,7 +8,7 @@ async def test_register_user(async_client):
         data={"username": "testuser", "password": "testpass"},
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["username"] == "testuser"
     assert "id" in data
