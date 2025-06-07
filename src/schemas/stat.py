@@ -10,3 +10,11 @@ class URLClickStats(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
     )
+
+
+class ClickStatInfo(BaseModel):
+    short_code: str
+    original_url: HttpUrl
+    clicks: int
+
+    model_config = ConfigDict(from_attributes=True, extra="forbid")

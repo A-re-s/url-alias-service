@@ -128,14 +128,14 @@ jobs:
         uses: actions/checkout@v4.2.2
 
       - name: Create .env file
-        uses: SpicyPizza/create-envfile@v2.0
-        with:
-          envkey_DB_PORT: 5432
-          envkey_DB_USER: postgres
-          envkey_DB_PASSWORD: postgres
-          envkey_DB_NAME: test_db
-          envkey_API_PORT: 8000
-          file_name: .env
+        run: |
+          cat << EOF > .env
+          DB_PORT=5432
+          DB_USER=postgres
+          DB_PASSWORD=postgres
+          DB_NAME=test_db
+          API_PORT=8000
+          EOF
 
       - name: Run docker compose
         uses: hoverkraft-tech/compose-action@v2.0.1

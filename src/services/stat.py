@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta, timezone
 from typing import List
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 
-from models.click_stats import ClickStat
-from models.short_urls import ShortURL
+from models.click_stats import ClickStatModel
+from models.short_urls import ShortURLModel
 from schemas.short_urls import ShortURLFilters
 from schemas.stat import URLClickStats
 from schemas.users import UserInfoResponseSchema
 from utils.unitofwork import IUnitOfWork
+from utils.url_utils import build_short_url_filters
 
 
 class StatService:
@@ -26,48 +27,25 @@ class StatService:
             )
             day_ago = int((datetime.now(timezone.utc) - timedelta(days=1)).timestamp())
 
-            conditions = [ShortURL.user_id == user.id]
+            conditions = build_short_url_filters(user.id, filters)
 
-            if filters.short_code:
-                conditions.append(ShortURL.short_code == filters.short_code)
-            if filters.original_url:
-                conditions.append(ShortURL.original_url == str(filters.original_url))
-            if filters.is_active is not None:
-                conditions.append(ShortURL.is_active == filters.is_active)
-            if filters.tag:
-                conditions.append(ShortURL.tag == filters.tag)
-
-            hour_clicks = (
-                select(func.count())
-                .select_from(ClickStat)
-                .where(
-                    ClickStat.short_url_id == ShortURL.id,
-                    ClickStat.clicked_at >= hour_ago,
-                )
-                .scalar_subquery()
-                .label("clicks_last_hour")
-            )
-
-            day_clicks = (
-                select(func.count())
-                .select_from(ClickStat)
-                .where(
-                    ClickStat.short_url_id == ShortURL.id,
-                    ClickStat.clicked_at >= day_ago,
-                )
-                .scalar_subquery()
-                .label("clicks_last_day")
-            )
+            hour_case = case((ClickStatModel.clicked_at >= hour_ago, 1), else_=0)
+            day_case = case((ClickStatModel.clicked_at >= day_ago, 1), else_=0)
 
             query = (
                 select(
-                    ShortURL,
-                    hour_clicks,
-                    day_clicks,
+                    ShortURLModel.id,
+                    ShortURLModel.original_url,
+                    ShortURLModel.short_code,
+                    func.sum(hour_case).label("clicks_last_hour"),
+                    func.sum(day_case).label("clicks_last_day"),
                 )
-                .select_from(ShortURL)
+                .outerjoin(
+                    ClickStatModel, ShortURLModel.id == ClickStatModel.short_url_id
+                )
                 .where(*conditions)
-                .order_by(day_clicks.desc())
+                .group_by(ShortURLModel.id)
+                .order_by(func.sum(day_case).desc())
             )
 
             offset = (filters.page - 1) * filters.page_size
@@ -78,8 +56,8 @@ class StatService:
 
             return [
                 URLClickStats(
-                    original_url=row.ShortURL.original_url,
-                    short_code=row.ShortURL.short_code,
+                    original_url=row.original_url,
+                    short_code=row.short_code,
                     clicks_last_hour=row.clicks_last_hour or 0,
                     clicks_last_day=row.clicks_last_day or 0,
                 )

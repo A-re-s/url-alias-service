@@ -1,6 +1,7 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Query
 from fastapi.responses import RedirectResponse
-from pydantic import HttpUrl
 
 from api.v1.dependencies import UOWDep, UserFromAccessTokenDep
 from config import SettingsDep
@@ -32,12 +33,7 @@ async def get_short_url(
 async def get_created_urls(
     user: UserFromAccessTokenDep,
     uow: UOWDep,
-    short_code: str | None = None,
-    original_url: HttpUrl | None = None,
-    is_active: bool | None = None,
-    tag: str | None = None,
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=10, ge=1, le=100),
+    filters: Annotated[ShortURLFilters, Query()],
 ):
     """
     Get user's URLs with filtering and pagination.
@@ -50,14 +46,6 @@ async def get_created_urls(
     - page: Page number (default: 1)
     - page_size: Items per page (default: 10, max: 100)
     """
-    filters = ShortURLFilters(
-        short_code=short_code,
-        original_url=original_url,
-        is_active=is_active,
-        tag=tag,
-        page=page,
-        page_size=page_size,
-    )
     return await UrlService().get_user_urls(uow, user, filters)
 
 

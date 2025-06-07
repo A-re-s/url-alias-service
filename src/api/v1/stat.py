@@ -1,7 +1,6 @@
-from typing import List
+from typing import Annotated, List
 
 from fastapi import APIRouter, Query
-from pydantic import HttpUrl
 
 from api.v1.dependencies import UOWDep, UserFromAccessTokenDep
 from schemas.short_urls import (
@@ -20,12 +19,7 @@ stat_router = APIRouter(
 async def get_url_statistics(
     user: UserFromAccessTokenDep,
     uow: UOWDep,
-    short_code: str | None = None,
-    original_url: HttpUrl | None = None,
-    is_active: bool | None = None,
-    tag: str | None = None,
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=10, ge=1, le=100),
+    filters: Annotated[ShortURLFilters, Query()],
 ):
     """
     Get click statistics for user's URLs.
@@ -46,12 +40,4 @@ async def get_url_statistics(
         - clicks_last_hour: Number of clicks in the last hour
         - clicks_last_day: Number of clicks in the last 24 hours
     """
-    filters = ShortURLFilters(
-        short_code=short_code,
-        original_url=original_url,
-        is_active=is_active,
-        tag=tag,
-        page=page,
-        page_size=page_size,
-    )
     return await StatService().get_click_statistics(uow, user, filters)

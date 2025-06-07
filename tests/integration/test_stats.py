@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from models.click_stats import ClickStat
+from models.click_stats import ClickStatModel
 
 
 @pytest.mark.asyncio
@@ -20,7 +20,7 @@ async def test_url_click_tracking(async_client, test_user):
 
     for _ in range(3):
         response = await async_client.get(f"/{short_code}")
-        assert response.status_code == 307  # Temporary redirect
+        assert response.status_code == 307
         assert response.headers["location"] == "https://example.com/"
 
     stats_response = await async_client.get(
@@ -39,7 +39,6 @@ async def test_url_click_tracking(async_client, test_user):
 
 @pytest.mark.asyncio
 async def test_url_click_limits(async_client, test_user):
-    # Create a short URL with click limit
     create_response = await async_client.post(
         "/api/v1/urls",
         json={

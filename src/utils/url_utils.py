@@ -1,3 +1,9 @@
+from typing import List
+
+from models.short_urls import ShortURLModel
+from schemas.short_urls import ShortURLFilters
+
+
 def id_to_short_url(num: int) -> str:
     """
     Convert a number to base62 string using digits 0-9, letters a-z and A-Z.
@@ -30,7 +36,7 @@ def id_to_short_url(num: int) -> str:
     return "".join(reversed(result))
 
 
-def generate_short_code(id: int) -> str:
+def generate_short_code(db_id: int) -> str:
     """
     Generate a unique short code from a database ID.
     This ensures uniqueness as database IDs are unique.
@@ -41,4 +47,19 @@ def generate_short_code(id: int) -> str:
     Returns:
         A unique short code
     """
-    return id_to_short_url(id) + "~"
+    return id_to_short_url(db_id) + "~"
+
+
+def build_short_url_filters(user_id: int, filters: ShortURLFilters) -> List:
+    conditions = [ShortURLModel.user_id == user_id]
+
+    if filters.short_code:
+        conditions.append(ShortURLModel.short_code == filters.short_code)
+    if filters.original_url:
+        conditions.append(ShortURLModel.original_url == str(filters.original_url))
+    if filters.is_active is not None:
+        conditions.append(ShortURLModel.is_active == filters.is_active)
+    if filters.tag:
+        conditions.append(ShortURLModel.tag == filters.tag)
+
+    return conditions
