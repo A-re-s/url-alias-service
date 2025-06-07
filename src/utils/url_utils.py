@@ -1,4 +1,4 @@
-from typing import List
+from sqlalchemy import and_
 
 from models.short_urls import ShortURLModel
 from schemas.short_urls import ShortURLFilters
@@ -50,7 +50,7 @@ def generate_short_code(db_id: int) -> str:
     return id_to_short_url(db_id) + "~"
 
 
-def build_short_url_filters(user_id: int, filters: ShortURLFilters) -> List:
+def build_short_url_filters(user_id: int, filters: ShortURLFilters):
     conditions = [ShortURLModel.user_id == user_id]
 
     if filters.short_code:
@@ -62,4 +62,4 @@ def build_short_url_filters(user_id: int, filters: ShortURLFilters) -> List:
     if filters.tag:
         conditions.append(ShortURLModel.tag == filters.tag)
 
-    return conditions
+    return and_(*conditions)

@@ -22,10 +22,11 @@ class SQLAlchemyRepository(AbstractRepository):
         await self.session.execute(stmt)
 
     async def find_all(
-        self, offset: int = 0, limit: int | None = None, **filter_by
+        self, offset: int = 0, limit: int | None = None, filter_expr=None
     ) -> List:
-        stmt = select(self.model).filter_by(**filter_by)
-
+        stmt = select(self.model)
+        if filter_expr is not None:
+            stmt = stmt.filter(filter_expr)
         if offset:
             stmt = stmt.offset(offset)
         if limit:

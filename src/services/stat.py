@@ -43,7 +43,7 @@ class StatService:
                 .outerjoin(
                     ClickStatModel, ShortURLModel.id == ClickStatModel.short_url_id
                 )
-                .where(*conditions)
+                .where(conditions)
                 .group_by(ShortURLModel.id)
                 .order_by(func.sum(day_case).desc())
             )

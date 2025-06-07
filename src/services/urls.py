@@ -107,7 +107,11 @@ class UrlService:
         """Get user's URLs with filtering and pagination."""
         async with uow:
             conditions = build_short_url_filters(user.id, filters)
-            urls = await uow.urls.find_all(*conditions)
+            urls = await uow.urls.find_all(
+                filter_expr=conditions,
+                offset=(filters.page - 1) * filters.page_size,
+                limit=filters.page_size,
+            )
 
             return [ShortURLInfo.model_validate(url) for url in urls]
 
