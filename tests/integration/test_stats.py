@@ -15,7 +15,7 @@ async def test_url_click_tracking(async_client, test_user):
         },
         headers={"Authorization": f"Bearer {test_user['access_token']}"},
     )
-    assert create_response.status_code == 200
+    assert create_response.status_code == 201
     short_code = create_response.json()["short_code"]
 
     for _ in range(3):
@@ -48,7 +48,7 @@ async def test_url_click_limits(async_client, test_user):
         },
         headers={"Authorization": f"Bearer {test_user['access_token']}"},
     )
-    assert create_response.status_code == 200
+    assert create_response.status_code == 201
     short_code = create_response.json()["short_code"]
 
     response = await async_client.get(f"/{short_code}")
@@ -70,7 +70,7 @@ async def test_stats_filtering_and_sorting(async_client, test_user):
             json={"original_url": url, "expire_minutes": 60, "tag": tag},
             headers={"Authorization": f"Bearer {test_user['access_token']}"},
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         short_codes.append(response.json()["short_code"])
 
     for i, code in enumerate(short_codes):

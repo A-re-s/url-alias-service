@@ -1,20 +1,40 @@
-from pydantic import BaseModel, ConfigDict, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
 class URLClickStats(BaseModel):
-    original_url: HttpUrl
-    short_code: str
-    clicks_last_hour: int
-    clicks_last_day: int
+    """Schema for URL click statistics."""
+
+    original_url: HttpUrl = Field(
+        description="The original URL that was shortened",
+        examples=["https://example.com/very/long/path?param=value"],
+    )
+    short_code: str = Field(
+        description="The unique short code for the URL",
+        examples=["abc123", "promo2024"],
+    )
+    clicks_last_hour: int = Field(
+        description="Number of clicks in the last hour", examples=[42, 156, 789]
+    )
+    clicks_last_day: int = Field(
+        description="Number of clicks in the last 24 hours", examples=[1234, 5678, 9012]
+    )
 
     model_config = ConfigDict(
         from_attributes=True,
+        json_schema_extra={
+            "examples": [
+                {
+                    "original_url": "https://example.com/very/long/path?param=value",
+                    "short_code": "promo2024",
+                    "clicks_last_hour": 42,
+                    "clicks_last_day": 1234,
+                },
+                {
+                    "original_url": "https://another-example.com/path",
+                    "short_code": "abc123",
+                    "clicks_last_hour": 156,
+                    "clicks_last_day": 5678,
+                },
+            ]
+        },
     )
-
-
-class ClickStatInfo(BaseModel):
-    short_code: str
-    original_url: HttpUrl
-    clicks: int
-
-    model_config = ConfigDict(from_attributes=True, extra="forbid")
