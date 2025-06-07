@@ -4,13 +4,9 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import DeclarativeBase
 
 from config import get_settings
-
-
-class Base(DeclarativeBase):
-    pass
+from models.base import Base
 
 
 class DatabaseManager:
@@ -22,7 +18,7 @@ class DatabaseManager:
 
     async def connect(self) -> None:
         try:
-            async with self.engine.connect() as conn:
+            async with self.engine.begin() as conn:
                 metadata = MetaData()
                 await conn.run_sync(metadata.reflect)
                 existing_tables = list(metadata.tables.keys())
